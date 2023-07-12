@@ -76,47 +76,14 @@ resources:
               WriteCapacityUnits: 2
 
 functions:
-  getNotes:
-    name: getAllNotes
-    handler: UserC.getNotes
-    description: 'Get All notes'
-    events:
-      - httpApi:
-          method: get
-          path: /notes
+  - ${file(./Notes-Get.yml)}
+  - ${file(./Notes-Write-Delete.yml)}
 
-  getNotesOfUser:
-    handler: UserC.getNotesOfUser
-    description: 'Get All notes of a user'
-    events:
-      - httpApi:
-          method: get
-          path: /notes/user/{user_id}
-
-  getNote:
-    handler: UserC.getNote
-    events:
-      - httpApi:
-          method: get
-          path: /notes/{id}
-
-  createNote:
-    handler: UserC.createNote
-    events:
-      - httpApi:
-          method: post
-          path: /notes
-
-  updateNote:
-    handler: UserC.updateNote
-    events:
-      - httpApi:
-          method: put
-          path: /notes/{id}
-
-  deleteNote:
-    handler: UserC.deleteNote
-    events:
-      - httpApi:
-          method: delete
-          path: /notes/{id}
+  # getNotes:
+  # name: getAllNotes
+  # handler: UserC.getNotes
+  # description: 'Get All notes'
+  # events:
+  #   - httpApi:
+  #       method: get
+  #       path: /notes
