@@ -1,0 +1,122 @@
+service: notes-api
+frameworkVersion: '3'
+
+plugins:
+  - serverless-offline
+  - serverless-iam-roles-per-function
+  - serverless-plugin-include-dependencies
+  - serverless-plugin-common-excludes
+
+custom:
+  serverless-offline:
+    reloadHandler: true
+    noTimeout: true
+
+provider:
+  name: aws
+  architecture: x86_64
+  region: ap-south-1
+  stage: dev
+  runtime: nodejs18.x
+  timeout: 10
+  environment:
+    # NOTES_TABLE: ${self:service}-${self:provider.stage}-NotesTable
+    NOTES_TABLE: ${self:resources.Resources.NotesTable.Properties.TableName}
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+            - dynamodb:ConditionCheckItem
+          Resource:
+            - arn:aws:dynamodb:${opt:region, self:provider.region}:${aws:accountId}:table/${self:provider.environment.NOTES_TABLE}
+            - arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.NOTES_TABLE}/index/note_id-glo-index
+
+## TODO - Try to use JSON instead of YAML
+
+resources:
+  Resources:
+    NotesTable:
+      Type: AWS::DynamoDB::Table
+      DeletionPolicy: Retain
+      Properties:
+        TableName: ${self:service}-${self:provider.stage}-NotesTable
+        AttributeDefinitions:
+          - AttributeName: user_id
+            AttributeType: S
+          - AttributeName: note_id
+            AttributeType: S
+          - AttributeName: timestamp
+            AttributeType: N
+        KeySchema:
+          - AttributeName: user_id
+            KeyType: HASH
+          - AttributeName: timestamp
+            KeyType: RANGE
+        # BillingMode: PAY_PER_REQUEST
+        ProvisionedThroughput:
+          ReadCapacityUnits: 2
+          WriteCapacityUnits: 2
+        GlobalSecondaryIndexes:
+          - IndexName: note_id-glo-index
+            KeySchema:
+              - AttributeName: note_id
+                KeyType: HASH
+              - AttributeName: timestamp
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+            ProvisionedThroughput:
+              ReadCapacityUnits: 2
+              WriteCapacityUnits: 2
+
+functions:
+  getNotes:
+    name: getAllNotes
+    handler: UserC.getNotes
+    description: 'Get All notes'
+    events:
+      - httpApi:
+          method: get
+          path: /notes
+
+  getNotesOfUser:
+    handler: UserC.getNotesOfUser
+    description: 'Get All notes of a user'
+    events:
+      - httpApi:
+          method: get
+          path: /notes/user/{user_id}
+
+  getNote:
+    handler: UserC.getNote
+    events:
+      - httpApi:
+          method: get
+          path: /notes/{id}
+
+  createNote:
+    handler: UserC.createNote
+    events:
+      - httpApi:
+          method: post
+          path: /notes
+
+  updateNote:
+    handler: UserC.updateNote
+    events:
+      - httpApi:
+          method: put
+          path: /notes/{id}
+
+  deleteNote:
+    handler: UserC.deleteNote
+    events:
+      - httpApi:
+          method: delete
+          path: /notes/{id}

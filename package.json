@@ -1,0 +1,24 @@
+{
+  "name": "04-user-notes",
+  "version": "1.0.0",
+  "main": "UserC.js",
+  "scripts": {
+    "dev": "nodemon -e js --exec \"serverless offline\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.363.0",
+    "@aws-sdk/lib-dynamodb": "^3.365.0",
+    "serverless-iam-roles-per-function": "^3.2.0",
+    "serverless-offline": "^12.0.4",
+    "serverless-plugin-common-excludes": "^4.0.0",
+    "serverless-plugin-include-dependencies": "5.0",
+    "uuid": "^9.0.0"
+  },
+  "description": "",
+  "devDependencies": {
+    "nodemon": "^2.0.22"
+  }
+}
